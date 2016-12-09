@@ -6,6 +6,11 @@
             [clojure.pprint :as pp]
             [ring.middleware.json :as json]))
 
+(defn json-response [b]
+  (resp/content-type
+    (resp/response b)
+    "application/json"))
+
 (defn debug
   [req]
   (let [req-as-str (with-out-str (pp/pprint req))
@@ -17,15 +22,11 @@
      "text/html")))
 
 (defn my-handler
-  [req]
-  (resp/content-type
-   (resp/response "<h1>I'm here</h1>")
-   "text/html"))
+  [_]
+   (resp/response "<h1>I'm here</h1>"))
 
-(defn authorized-response [authorized?]
-  (resp/content-type
-   (resp/response (str "{\"authorized\": " authorized? " }"))
-   "application/json"))
+(defn authorized-response [auth]
+   { :authorized auth } )
 
 (defn authorized? [value]
   (< value 100))
@@ -40,13 +41,12 @@
       debug-body
       (get "amount")
       authorized?
-      authorized-response))
+      authorized-response
+      json-response))
 
-(defn get-health [b]
-  (resp/content-type
-   (resp/response
-     { :service "payment" :status "OK" :time (quot (System/currentTimeMillis) 1000) } )
-   "application/json"))
+(defn get-health [_]
+  (json-response { :service "payment" :status "OK" :time (quot (System/currentTimeMillis) 1000) } ))
+
 
 (defroutes app-routes
   (GET "/" [] my-handler)
