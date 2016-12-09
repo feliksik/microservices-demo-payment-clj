@@ -16,12 +16,33 @@
      "text/html")))
 
 (defn my-handler
-  []
+  [req]
   (resp/content-type
-   (resp/response "<h1>I'm here</h1>")))
+   (resp/response "<h1>I'm here</h1>")
+   "text/html"))
+
+(defn parse [body]
+  {:amount 42})
+
+(defn authorized-response [authorized?]
+  (resp/content-type
+   (resp/response (str "{\"authorized\": " authorized? " }"))
+   "application/json"))
+
+(defn authorized? [value]
+  true)
+
+(defn authorize
+  [body]
+  (-> body
+      parse
+      :amount
+      authorized?
+      authorized-response))
 
 (defroutes app-routes
   (GET "/" [] my-handler)
+  (POST "/paymentAuth" {body :body} (authorize body))
   (GET "/debug" [] debug)
   (route/not-found "Not Found"))
 
