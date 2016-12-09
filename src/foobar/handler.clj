@@ -2,24 +2,28 @@
   (:require [compojure.core :refer :all]
             [compojure.route :as route]
             [ring.util.response :as resp]
-            [ring.middleware.defaults :refer [wrap-defaults site-defaults]]))
+            [ring.middleware.defaults :refer [wrap-defaults api-defaults]]
+            [clojure.pprint :as pp]))
+
+(defn debug
+  [req]
+  (let [req-as-str (with-out-str (pp/pprint req))
+        title "<h1>the request was:</h1>"
+        pre (str "<pre>" req-as-str "</pre>")
+        body (str title pre)]
+    (resp/content-type
+     (resp/response body)
+     "text/html")))
 
 (defn my-handler
-  [req]
+  []
   (resp/content-type
-   (resp/response "<h1>I'm here</h1>")
-   "text/html"))
-
-(defn my-another-handler
-  [req]
-  (resp/content-type
-    (resp/response "<h1>I'm also here</h1>")
-    "text/html"))
+   (resp/response "<h1>I'm here</h1>")))
 
 (defroutes app-routes
   (GET "/" [] my-handler)
-  (GET "/another" [] my-another-handler)
+  (GET "/debug" [] debug)
   (route/not-found "Not Found"))
 
 (def app
-  (wrap-defaults app-routes site-defaults))
+  (wrap-defaults app-routes api-defaults))
