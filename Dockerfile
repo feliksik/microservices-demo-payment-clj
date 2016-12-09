@@ -2,7 +2,6 @@ FROM clojure:latest
 
 WORKDIR /opt/code
 COPY project.clj /opt/code/project.clj
-COPY . /opt/code
-RUN lein ring war
+RUN lein install
 
 CMD ["lein", "ring", "server-headless"]
